@@ -40,8 +40,10 @@ public class HomeController {
                 User user=userService.findUserById(post.getUserId());
                 map.put("user",user);
                 doscissPosts.add(map);
+
             }
         }
+
         model.addAttribute("discussPosts",doscissPosts);
         return "index";
     }
