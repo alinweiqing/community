@@ -4,7 +4,9 @@ import com.lwq.entity.DiscussPost;
 import com.lwq.entity.Page;
 import com.lwq.entity.User;
 import com.lwq.service.DiscussPostService;
+import com.lwq.service.LikeService;
 import com.lwq.service.UserService;
+import com.lwq.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,10 +19,13 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
+
+    @Autowired
+    private LikeService likeService;
 
     @Autowired
     private UserService userService;
@@ -39,6 +44,9 @@ public class HomeController {
                 map.put("post",post);
                 User user=userService.findUserById(post.getUserId());
                 map.put("user",user);
+
+                long likeCount=likeService.findEntityLikeCount(ENTITY_TYPE_POST,post.getId());
+                map.put("likecount",likeCount);
                 doscissPosts.add(map);
 
             }

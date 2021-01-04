@@ -180,6 +180,10 @@ public class UserService implements CommunityConstant {
         return userMapper.updateHeader(userId, headerUrl);
     }
 
+    public User findUserByName(String username){
+        return  userMapper.selectByName(username);
+    }
+
 
 
     public Map<String, Object> updatePassword(String oldPassword,String newPassword,String newPasswordConfim) {

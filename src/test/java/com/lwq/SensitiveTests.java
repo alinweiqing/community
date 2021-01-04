@@ -1,9 +1,14 @@
 package com.lwq;
 
+import com.alibaba.fastjson.JSONArray;
 import com.lwq.util.SensitiveFilter;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.HashMap;
 
 @SpringBootTest
 public class SensitiveTests {
@@ -22,4 +27,23 @@ public class SensitiveTests {
         System.out.println(text);
 
     }
+
+
+    @ResponseBody
+    public static String jsons() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("1", "q");
+        map.put("2", "w");
+        map.put("3", "x");
+//        JSONObject jsonObject=new JSONObject(map);
+//        System.out.println(jsonObject);
+        return JSONArray.toJSONString(map);
+
+    }
+
+    public static void main(String[] args) {
+
+        System.out.println(  jsons());
+    }
+
 }

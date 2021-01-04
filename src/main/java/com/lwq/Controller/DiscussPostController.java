@@ -6,7 +6,9 @@ import com.lwq.entity.Page;
 import com.lwq.entity.User;
 import com.lwq.service.CommentService;
 import com.lwq.service.DiscussPostService;
+import com.lwq.service.LikeService;
 import com.lwq.service.UserService;
+import com.lwq.util.CommunityConstant;
 import com.lwq.util.CommunityUtil;
 import com.lwq.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
 
-import static com.lwq.util.CommunityConstant.ENTITY_TYPE_COMMENT;
-import static com.lwq.util.CommunityConstant.ENTITY_TYPE_POST;
-
 @Controller
 @RequestMapping("/discuss")
-public class DiscussPostController {
+public class DiscussPostController  implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
@@ -37,6 +36,9 @@ public class DiscussPostController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private LikeService likeService;
 
 
     @RequestMapping(path = "/add",method = RequestMethod.POST)
@@ -62,11 +64,21 @@ public class DiscussPostController {
     @RequestMapping(path = "/detail/{discussPostId}",method = RequestMethod.GET)
     public String getDiscussPost(@PathVariable("discussPostId") int discussPostId, Model model, Page page){
         //帖子
-        DiscussPost post = discussPostService.findDiscussPostByid(discussPostId);
+        DiscussPost post = discussPostService.findDiscussPostById(discussPostId);
         model.addAttribute("post",post);
         //作者
         User user = userService.findUserById(post.getUserId());
         model.addAttribute("user",user);
+        //点赞数量
+        long likeCount=likeService.findEntityLikeCount(ENTITY_TYPE_POST,discussPostId);
+        model.addAttribute("likeCount",likeCount);
+        //点赞状态
+        long likeStatus=hostHolder.getUser()==null?0:
+                likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_POST,discussPostId);
+        model.addAttribute("likeStatus",likeStatus);
+
+
+
 
         //评论分页信息
         page.setLimit(5);
@@ -89,6 +101,15 @@ public class DiscussPostController {
                 commentVo.put("comment",comment);
                 //作者
                 commentVo.put("user",userService.findUserById(comment.getUserId()));
+                //点赞数量
+                long likeCount2=likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT,comment.getId());
+                commentVo.put("likeCount2",likeCount2);
+                //点赞状态
+                likeStatus=hostHolder.getUser()==null?0:
+                        likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_COMMENT,comment.getId());
+                commentVo.put("likeStatus",likeStatus);
+
+
 
                 //回复列表
                 List<Comment> replyList=commentService.findCommentsByEntity(ENTITY_TYPE_COMMENT,comment.getId(),0,Integer.MAX_VALUE);
@@ -102,8 +123,20 @@ public class DiscussPostController {
                         replyVo.put("reply",reply);
                         //作者
                         replyVo.put("user",userService.findUserById(reply.getUserId()));
+
+                        //点赞数量
+                        long likeCount3=likeService.findEntityLikeCount(ENTITY_TYPE_COMMENT,reply.getId());
+                        replyVo.put("likeCount3",likeCount3);
+                        //点赞状态
+                        likeStatus=hostHolder.getUser()==null?0:
+                                likeService.findEntityLikeStatus(hostHolder.getUser().getId(),ENTITY_TYPE_COMMENT,reply.getId());
+                        replyVo.put("likeStatus",likeStatus);
+
+
+
+
                         //回复目标
-                       User target= reply.getTargetId()==0?null:userService.findUserById(reply.getTargetId());
+                        User target= reply.getTargetId()==0?null:userService.findUserById(reply.getTargetId());
                         replyVo.put("target",target);
 
                         replyVoList.add(replyVo);

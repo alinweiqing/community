@@ -1,7 +1,10 @@
 package com.lwq.Controller;
 
 import com.lwq.entity.User;
+import com.lwq.service.FollowService;
+import com.lwq.service.LikeService;
 import com.lwq.service.UserService;
+import com.lwq.util.CommunityConstant;
 import com.lwq.util.CommunityUtil;
 import com.lwq.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +29,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     private  static  final Logger logger= LoggerFactory.getLogger(UserController.class);
 
@@ -46,11 +49,18 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
+
 
     @RequestMapping(path = "/setting",method = RequestMethod.GET)
     public String getSettingPage(){
         return  "/site/setting";
     }
+
 
     //上传必须为post
 
@@ -127,5 +137,36 @@ public class UserController {
         return "/site/setting";
 
 
+    }
+
+    //个人主页
+    @RequestMapping(path = "/profile/{userId}",method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId,Model model){
+        User user = userService.findUserById(userId);
+        if(user==null){
+            throw new RuntimeException("改用户不存在！");
+        }
+
+        //用户
+        model.addAttribute("user",user);
+        //点赞数量
+        int likecount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likecount",likecount);
+
+        // 关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        // 粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+        // 是否已关注
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
+
+
+        return "/site/profile";
     }
 }
