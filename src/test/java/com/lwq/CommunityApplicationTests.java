@@ -6,10 +6,14 @@ import com.lwq.dao.MessageMapper;
 import com.lwq.entity.DiscussPost;
 import com.lwq.entity.LoginTicket;
 import com.lwq.entity.Message;
+import com.lwq.util.CommunityUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.DigestUtils;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +32,21 @@ class CommunityApplicationTests {
     @Test
     void contextLoads() {
     }
+    @Test
+    public void testMd5() throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        // java自带工具包MessageDigest
+        String resultString = CommunityUtil.md5("123456");
+        System.out.println(resultString);
+        // e10adc3949ba59abbe56e057f20f883e
+        String resultString1 = CommunityUtil.md5("1234");
+        System.out.println(resultString1);
+        //81dc9bdb52d04dc20036dbd8313ed055
 
+        // spring自带工具包DigestUtils
+        System.out.println(DigestUtils.md5DigestAsHex("1234".getBytes()));
+        // 81dc9bdb52d04dc20036dbd8313ed055
+    }
     @Test
     public  void TestSelectPosts(){
         List<DiscussPost> list = discussPostMapper.selectDiscussPosts(149,0,10);

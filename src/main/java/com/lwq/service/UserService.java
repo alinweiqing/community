@@ -11,14 +11,12 @@ import com.lwq.util.MailClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class UserService implements CommunityConstant {
@@ -86,7 +84,8 @@ public class UserService implements CommunityConstant {
 
         // 注册用户
         user.setSalt(CommunityUtil.generateUUID().substring(0, 5));
-        user.setPassword(CommunityUtil.md5(user.getPassword() + user.getSalt()));
+   user.setPassword(CommunityUtil.md5(user.getPassword() + user.getSalt()));
+        //user.setPassword(user.getPassword());
         user.setType(0);
         user.setStatus(0);
         user.setActivationCode(CommunityUtil.generateUUID());
@@ -148,7 +147,8 @@ public class UserService implements CommunityConstant {
         }
 
         //验证密码
-        password = CommunityUtil.md5(password + user.getSalt());
+       password = CommunityUtil.md5(password + user.getSalt());
+      //  password = password;
         if (!user.getPassword().equals(password)) {
             map.put("passwordMsg", "密码不正确！");
             return map;
@@ -224,5 +224,30 @@ public class UserService implements CommunityConstant {
 
 
     }
+
+
+
+    //授权
+    public Collection<? extends GrantedAuthority> getAuthorities(int userId){
+        User user = this.findUserById(userId);
+
+        List<GrantedAuthority> list = new ArrayList<>();
+        list.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                switch (user.getType()){
+                    case 1:
+                        return AUTHORITY_ADMIN;
+                    case 2:
+                        return AUTHORITY_MODERATOR;
+                    default:
+                         return AUTHORITY_USER;
+
+                }
+            }
+        });
+        return list;
+    }
+
 
 }

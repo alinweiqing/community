@@ -1,6 +1,5 @@
 package com.lwq.config;
 
-import com.lwq.Controller.Interceptor.LoginRequiredInterceptor;
 import com.lwq.Controller.Interceptor.LoginTicketInterceptor;
 import com.lwq.Controller.Interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +15,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Autowired
     private LoginTicketInterceptor loginTicketInterceptor;
 
-    @Autowired
-    private LoginRequiredInterceptor loginRequiredInterceptor;
+//    @Autowired
+//    private LoginRequiredInterceptor loginRequiredInterceptor;
 
     @Autowired
     private MessageInterceptor messageInterceptor;
@@ -29,8 +28,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns("/static/**");
 
-        registry.addInterceptor(loginRequiredInterceptor)
-                .excludePathPatterns("/static/**");
+//        registry.addInterceptor(loginRequiredInterceptor)
+//                .excludePathPatterns("/static/**");
 
         registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/static/**");
