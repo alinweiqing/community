@@ -7,7 +7,9 @@ import com.lwq.service.LikeService;
 import com.lwq.util.CommunityConstant;
 import com.lwq.util.CommunityUtil;
 import com.lwq.util.HostHolder;
+import com.lwq.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +29,9 @@ public class LikeController implements CommunityConstant {
 
     @Autowired
     private EventProducer eventProducer;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/like",method = RequestMethod.POST)
     @ResponseBody
@@ -58,6 +63,14 @@ public class LikeController implements CommunityConstant {
                     .setData("postId",postId);
             eventProducer.fireEvent(event);
         }
+
+        if(entityType == ENTITY_TYPE_POST) {
+            // 计算帖子分数
+            String redisKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey, postId);
+        }
+
+
 
         return CommunityUtil.getJSONString(0,null,map);
 
