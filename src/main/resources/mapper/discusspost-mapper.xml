@@ -64,7 +64,12 @@
         update discuss_post set score = #{score} where id = #{id}
     </update>
 
-
+    <select id="selectCountByUserId" resultType="int">
+        SELECT COUNT(id)
+        FROM discuss_post
+        WHERE STATUS != 2
+	    AND user_id = #{userId}
+    </select>
 
 
 

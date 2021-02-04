@@ -32,6 +32,8 @@ public interface DiscussPostMapper {
     //计算帖子分数
     int updateScore(int id, double score);
 
+    //查询某用户帖子的数量
+    int selectCountByUserId(int userId);
 
 
 }

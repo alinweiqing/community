@@ -1,9 +1,10 @@
 package com.lwq.Controller;
 
+import com.lwq.entity.Comment;
+import com.lwq.entity.DiscussPost;
+import com.lwq.entity.Page;
 import com.lwq.entity.User;
-import com.lwq.service.FollowService;
-import com.lwq.service.LikeService;
-import com.lwq.service.UserService;
+import com.lwq.service.*;
 import com.lwq.util.CommunityConstant;
 import com.lwq.util.CommunityUtil;
 import com.lwq.util.HostHolder;
@@ -25,6 +26,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -54,6 +58,13 @@ public class UserController implements CommunityConstant {
 
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private CommentService commentService;
+
 
 
     @RequestMapping(path = "/setting",method = RequestMethod.GET)
@@ -169,4 +180,76 @@ public class UserController implements CommunityConstant {
 
         return "/site/profile";
     }
+
+    //我的帖子
+    @RequestMapping(path = "/mypost",method = RequestMethod.GET)
+    public String toMyPost(Model model, Page page) {
+        // 获取当前登录用户
+        User curUser = hostHolder.getUser();
+        model.addAttribute("user", curUser);
+
+        // 设置分页信息
+        page.setLimit(5);
+        page.setRows(discussPostService.findDiscussPostRows(curUser.getId()));
+        page.setPath("/user/mypost");
+
+
+        // 查询某用户发布的帖子
+        List<DiscussPost> discussPosts = discussPostService.findDiscussPosts(curUser.getId(), page.getOffset(), page.getLimit(),0);
+        List<Map<String, Object>> list = new ArrayList<>();
+        if (discussPosts != null) {
+            for (DiscussPost post : discussPosts) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("post", post);
+                // 点赞数量
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
+
+                list.add(map);
+            }
+        }
+        // 帖子数量
+        int postCount = discussPostService.selectCountByUserId(curUser.getId());
+        model.addAttribute("postCount", postCount);
+        model.addAttribute("discussPosts", list);
+
+        return "site/my-post";
+    }
+
+
+    //我的评论
+    @RequestMapping(path = "/mycomment",method = RequestMethod.GET)
+    public String toMyReply(Model model, Page page) {
+        // 获取当前登录用户
+        User curUser = hostHolder.getUser();
+        model.addAttribute("user", curUser);
+
+        // 设置分页信息
+        page.setLimit(5);
+        page.setRows(commentService.selectCountByUserId(curUser.getId()));
+        page.setPath("/user/mycomment");
+
+        // 获取用户所有评论 (而不是回复,所以在 sql 里加一个条件 entity_type = 1)
+        List<Comment> comments = commentService.selectCommentByUserId(curUser.getId(), page.getOffset(), page.getLimit());
+        List<Map<String, Object>> list = new ArrayList<>();
+        if (comments != null) {
+            for (Comment comment : comments) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("comment", comment);
+
+                // 根据实体 id 查询对应的帖子标题
+                String discussPostTitle = discussPostService.findDiscussPostById(comment.getEntityId()).getTitle();
+                map.put("discussPostTitle", discussPostTitle);
+
+                list.add(map);
+            }
+        }
+        // 回复的数量
+        int commentCount = commentService.selectCountByUserId(curUser.getId());
+        model.addAttribute("commentCount", commentCount);
+
+        model.addAttribute("comments", list);
+        return "site/my-reply";
+    }
+
 }

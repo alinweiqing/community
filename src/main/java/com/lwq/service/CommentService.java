@@ -60,4 +60,13 @@ public class CommentService {
         return commentMapper.selectCommentById(id);
     }
 
+    public int selectCountByUserId(int userId) {
+        return commentMapper.selectCountByUserId(userId);
+    }
+
+
+    public List<Comment> selectCommentByUserId(int userId, int offset, int limit) {
+        return commentMapper.selectCommentByUserId(userId, offset, limit);
+    }
+
 }

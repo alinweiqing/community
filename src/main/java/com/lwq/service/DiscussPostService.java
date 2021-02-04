@@ -61,6 +61,8 @@ public class DiscussPostService {
     public int updateScore(int id, double score) {
         return discussPostMapper.updateScore(id, score);
     }
-
+    public int selectCountByUserId(int userId) {
+        return discussPostMapper.selectCountByUserId(userId);
+    }
 
 }
