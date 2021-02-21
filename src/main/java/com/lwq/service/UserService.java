@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.util.*;
 
@@ -92,16 +91,17 @@ public class UserService implements CommunityConstant {
         user.setHeaderUrl(String.format("http://images.nowcoder.com/head/%dt.png", new Random().nextInt(1000)));
         user.setCreateTime(new Date());
         userMapper.insertUser(user);
+        userMapper.updateStatus(user.getId(),1);
 
         //发送激活邮件
-        Context context = new Context();
-        context.setVariable("email", user.getEmail());
+//        Context context = new Context();
+//        context.setVariable("email", user.getEmail());
 
         //http://localhost:8080/cpmmunity/activation/101/code
-        String url = domain + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
-        context.setVariable("url", url);
-        String content = templateEngine.process("/mail/activation", context);
-        mailClient.sendMail(user.getEmail(), "激活账号", content);
+//        String url = domain + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
+//        context.setVariable("url", url);
+//        String content = templateEngine.process("/mail/activation", context);
+//        mailClient.sendMail(user.getEmail(), "激活账号", content);
 
         return map;
     }
